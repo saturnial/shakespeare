@@ -1,0 +1,33 @@
+<html>
+<head>
+  <title>Search Shakespeare</title>
+</head>
+<body>
+<h1>Search Shakespeare</h1>
+
+<form name="search" action="/search" method="get">
+  <input type="text" name="query">
+  <input type="submit" value="Search">
+</form>
+
+{% if results %}
+
+<h2>Search results</h2>
+
+<table>
+  <tr>
+    <th>Book</th>
+    <th>Sentence</th>
+  </tr>
+  {% for result in results %}
+  <tr>
+    <td> {{ result.book }} </td>
+    <td> {{ result.sentence }} </td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endif %}
+
+</body>
+</html>
