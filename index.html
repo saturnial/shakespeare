@@ -10,19 +10,19 @@
   <input type="submit" value="Search">
 </form>
 
-{% if results %}
+{% if result.word %}
 
-<h2>Search results</h2>
+<h2>Search results for {{ result.word }}</h2>
 
 <table>
   <tr>
     <th>Book</th>
     <th>Sentence</th>
   </tr>
-  {% for result in results %}
+  {% for sentence in result.sentences %}
   <tr>
-    <td> {{ result.book }} </td>
-    <td> {{ result.sentence }} </td>
+    <td> {{ sentence.book }} </td>
+    <td> {{ sentence.sentence }} </td>
   </tr>
   {% endfor %}
 </table>
