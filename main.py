@@ -6,6 +6,7 @@ from collections import defaultdict
 
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
+from google.appengine.ext import ndb
 
 import jinja2
 import webapp2
@@ -56,7 +57,8 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     for line in lines:
       words = line.split(' ')
       for word in words:
-        mapping[word].append(line)
+        if line not in mapping[word]:
+          mapping[word].append(line)
     for word, sentences in mapping.iteritems():
       sentence_instances = []
       for sentence in sentences:
@@ -64,6 +66,12 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
       db_object = models.Word(word=word, sentences=sentence_instances)
       db_object.put()
     self.redirect('/serve/%s' % blob_info.key())
+
+
+class DeleteHandler(webapp2.RequestHandler):
+
+  def get(self):
+    ndb.delete_multi(models.Word.query().fetch(keys_only=True))
 
 
 class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
@@ -78,6 +86,7 @@ application = webapp2.WSGIApplication([
     ('/serve/([^/]+)?', ServeHandler),
     ('/search', Search),
     ('/upload', UploadHandler),
+    ('/admin/delete', DeleteHandler),
     ('/admin', AdminHandler),
     ('/', MainPage),
 ], debug=True)

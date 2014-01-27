@@ -10,4 +10,3 @@ class Word(ndb.Model):
   word = ndb.StringProperty(required=True)
   sentences = ndb.StructuredProperty(Sentence, repeated=True)
 
-

@@ -35,3 +35,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# specific to this project
+texts/
+mapreduce/

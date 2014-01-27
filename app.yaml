@@ -16,3 +16,6 @@ libraries:
 
 builtins:
 - remote_api: on
+
+includes:
+- mapreduce/include.yaml
