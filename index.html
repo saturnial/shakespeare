@@ -12,8 +12,9 @@
 
 {% if result %}
 
-<h2>Search results for {{ result.word }}</h2>
+<h2>Search results for "{{ result.word }}"</h2>
 
+<p>(Showing {{ result.sentences|count }} results)</p>
 <table>
   <tr>
     <th>Book</th>
