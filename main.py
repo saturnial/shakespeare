@@ -4,6 +4,7 @@ import urllib
 
 from collections import defaultdict
 
+from google.appengine.api import users
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext import ndb
@@ -50,22 +51,26 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
   def post(self):
     upload_files = self.get_uploads('file')
     book_title = self.request.get('book_title')
-    blob_info = upload_files[0]
-    uploaded_file = blobstore.BlobReader(blob_info.key())
-    lines = uploaded_file.read().splitlines()
-    mapping = defaultdict(list)
-    for line in lines:
-      words = line.split(' ')
-      for word in words:
-        if line not in mapping[word]:
-          mapping[word].append(line)
-    for word, sentences in mapping.iteritems():
-      sentence_instances = []
-      for sentence in sentences:
-        sentence_instances.append(models.Sentence(book=book_title, sentence=sentence))
-      db_object = models.Word(word=word, sentences=sentence_instances)
-      db_object.put()
-    self.redirect('/serve/%s' % blob_info.key())
+    user = users.get_current_user()
+    blob_key = upload_files[0].key()
+    uploaded_file = blobstore.BlobReader(blob_key)
+    book = models.Book(uploaded_by=user.nickname(), title=book_title,
+        blob_key=str(blob_key))
+    book.put()
+    # lines = uploaded_file.read().splitlines()
+    # mapping = defaultdict(list)
+    # for line in lines:
+    #   words = line.split(' ')
+    #   for word in words:
+    #     if line not in mapping[word]:
+    #       mapping[word].append(line)
+    # for word, sentences in mapping.iteritems():
+    #   sentence_instances = []
+    #   for sentence in sentences:
+    #     sentence_instances.append(models.Sentence(book=book_title, sentence=sentence))
+    #   db_object = models.Word(word=word, sentences=sentence_instances)
+    #   db_object.put()
+    self.redirect('/serve/%s' % blob_key)
 
 
 class DeleteHandler(webapp2.RequestHandler):
