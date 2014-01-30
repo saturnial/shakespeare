@@ -14,6 +14,7 @@ import webapp2
 
 import models
 
+import map_reduce
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -54,9 +55,12 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     user = users.get_current_user()
     blob_key = upload_files[0].key()
     uploaded_file = blobstore.BlobReader(blob_key)
-    book = models.Book(uploaded_by=user.nickname(), title=book_title,
+    book = models.Book(uploaded_by=user, title=book_title,
         blob_key=str(blob_key))
     book.put()
+    pipeline = map_reduce.WordCountPipeline(book_title, str(blob_key))
+    pipeline.start()
+    self.redirect(pipeline.base_path + "/status?root=" + pipeline.pipeline_id)
     # lines = uploaded_file.read().splitlines()
     # mapping = defaultdict(list)
     # for line in lines:
@@ -70,7 +74,7 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     #     sentence_instances.append(models.Sentence(book=book_title, sentence=sentence))
     #   db_object = models.Word(word=word, sentences=sentence_instances)
     #   db_object.put()
-    self.redirect('/serve/%s' % blob_key)
+    # self.redirect('/serve/%s' % blob_key)
 
 
 class DeleteHandler(webapp2.RequestHandler):
