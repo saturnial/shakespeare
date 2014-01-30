@@ -69,12 +69,7 @@ class StoreOutput(base_handler.PipelineBase):
   """
 
   def run(self, encoded_key, output):
-    logging.debug("output is %s" % str(output))
-    logging.info('I HAVE THE KEY')
-    logging.info(encoded_key)
-    key = ndb.Key('Book', str(encoded_key))
-    logging.info(key)
-    book = key.get()
-    logging.info(book)
-    book.wordcount_link = output[0]
+    book = models.Book.query(models.Book.title == encoded_key).get() 
+    link = output[0]
+    book.wordcount_link = link
     book.put()

@@ -26,7 +26,10 @@ class MainPage(webapp2.RequestHandler):
 
   def get(self):
     template = JINJA_ENVIRONMENT.get_template('index.html')
-    self.response.write(template.render())
+    query = models.Book.query()
+    last_10 = query.fetch(10)
+    template_values={'map_reduce_results': last_10}
+    self.response.write(template.render(template_values))
 
 
 class Search(webapp2.RequestHandler):
@@ -74,7 +77,7 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     #     sentence_instances.append(models.Sentence(book=book_title, sentence=sentence))
     #   db_object = models.Word(word=word, sentences=sentence_instances)
     #   db_object.put()
-    # self.redirect('/serve/%s' % blob_key)
+    # self.redirect('/blobstore/%s' % blob_key)
 
 
 class DeleteHandler(webapp2.RequestHandler):
@@ -92,7 +95,7 @@ class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
 
 
 application = webapp2.WSGIApplication([
-    ('/serve/([^/]+)?', ServeHandler),
+    ('/blobstore/([^/]+)?', ServeHandler),
     ('/search', Search),
     ('/upload', UploadHandler),
     ('/admin/delete', DeleteHandler),

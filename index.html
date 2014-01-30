@@ -9,7 +9,14 @@
   <input type="text" name="query">
   <input type="submit" value="Search">
 </form>
-
+{% if map_reduce_results %}
+<h2>MapReduce Results</h2>
+  <ul> 
+  {% for result in map_reduce_results %}
+    <li><a href="{{ result.wordcount_link }}">{{ result.title }}</a></li>
+  {% endfor %}
+  </ul>
+{% endif %}
 {% if result %}
 
 <h2>Search results for "{{ result.word }}"</h2>
