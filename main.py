@@ -26,10 +26,7 @@ class MainPage(webapp2.RequestHandler):
 
   def get(self):
     template = JINJA_ENVIRONMENT.get_template('index.html')
-    query = models.Book.query()
-    last_10 = query.fetch(10)
-    template_values={'map_reduce_results': last_10}
-    self.response.write(template.render(template_values))
+    self.response.write(template.render())
 
 
 class Search(webapp2.RequestHandler):
@@ -45,7 +42,9 @@ class Search(webapp2.RequestHandler):
 class AdminHandler(webapp2.RequestHandler):
 
   def get(self):
-    template_values = {'upload_url': blobstore.create_upload_url('/upload')}
+    books = models.Book.query()
+    template_values = {'map_reduce_results': books,
+                       'upload_url': blobstore.create_upload_url('/upload')}
     template = JINJA_ENVIRONMENT.get_template('upload.html')
     self.response.write(template.render(template_values))
 
@@ -64,20 +63,6 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     pipeline = map_reduce.WordCountPipeline(book_title, str(blob_key))
     pipeline.start()
     self.redirect(pipeline.base_path + "/status?root=" + pipeline.pipeline_id)
-    # lines = uploaded_file.read().splitlines()
-    # mapping = defaultdict(list)
-    # for line in lines:
-    #   words = line.split(' ')
-    #   for word in words:
-    #     if line not in mapping[word]:
-    #       mapping[word].append(line)
-    # for word, sentences in mapping.iteritems():
-    #   sentence_instances = []
-    #   for sentence in sentences:
-    #     sentence_instances.append(models.Sentence(book=book_title, sentence=sentence))
-    #   db_object = models.Word(word=word, sentences=sentence_instances)
-    #   db_object.put()
-    # self.redirect('/blobstore/%s' % blob_key)
 
 
 class DeleteHandler(webapp2.RequestHandler):

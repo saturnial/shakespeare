@@ -8,6 +8,7 @@ import models
 import logging
 import re
 
+
 class WordCountPipeline(base_handler.PipelineBase):
 
   def run(self, filekey, blobkey):
@@ -20,7 +21,7 @@ class WordCountPipeline(base_handler.PipelineBase):
         "mapreduce.output_writers.FileOutputWriter",
         mapper_params={
             "input_reader": {
-                "blob_keys": [blobkey],
+                "blob_keys": [blobkey]
             },
         },
         reducer_params={
@@ -49,15 +50,18 @@ def split_into_words(s):
 def word_count_map(data):
   """Word count map function."""
   (byte_offset, line_value) = data
-
   for s in split_into_sentences(line_value):
     for w in split_into_words(s.lower()):
-      yield (w, "")
+      yield (w, s)
 
 
 def word_count_reduce(key, values):
   """Word count reduce function."""
-  yield "%s: %d\n" % (key, len(values))
+  sentences = []
+  for sentence in values:
+    sentences.append(models.Sentence(sentence=sentence, book="not dynamic"))
+  word = models.Word(word=key, sentences=sentences)
+  word.put()
 
 
 class StoreOutput(base_handler.PipelineBase):
@@ -69,7 +73,7 @@ class StoreOutput(base_handler.PipelineBase):
   """
 
   def run(self, encoded_key, output):
-    book = models.Book.query(models.Book.title == encoded_key).get() 
+    book = models.Book.query(models.Book.title == encoded_key).get()
     link = output[0]
     book.wordcount_link = link
     book.put()

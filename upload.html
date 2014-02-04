@@ -11,5 +11,14 @@
   <div><input type="submit" value="Upload"></div>
 </form>
 
+{% if map_reduce_results %}
+<h2>MapReduce Results</h2>
+  <ul>
+  {% for result in map_reduce_results %}
+    <li><a href="{{ result.wordcount_link }}">{{ result.title }}</a></li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
 </body>
 </html>
