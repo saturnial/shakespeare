@@ -1,5 +1,6 @@
 from mapreduce import base_handler
 from mapreduce import mapreduce_pipeline
+from mapreduce import context
 
 from google.appengine.ext import ndb
 
@@ -29,6 +30,7 @@ class WordCountPipeline(base_handler.PipelineBase):
                 "mime_type": "text/plain",
                 "output_sharding": "input",
                 "filesystem": "blobstore",
+                "book_title": filekey,
             },
         },
         shards=16)
@@ -58,8 +60,10 @@ def word_count_map(data):
 def word_count_reduce(key, values):
   """Word count reduce function."""
   sentences = []
+  ctx = context.get()
+  title = ctx.mapreduce_spec.mapper.params['output_writer']['book_title']
   for sentence in values:
-    sentences.append(models.Sentence(sentence=sentence, book="not dynamic"))
+    sentences.append(models.Sentence(sentence=sentence, book=title))
   word = models.Word(word=key, sentences=sentences)
   word.put()
 
